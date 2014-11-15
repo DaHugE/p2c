@@ -1,0 +1,136 @@
+import java_cup.runtime.*;
+
+parser code {:
+       public static void main(String args[]) throws Exception {
+       	      new parser(new Yylex(System.in)).parse();
+       }
+:}
+
+action code {:
+
+:}
+
+terminal _BEGIN;
+terminal _END;
+terminal IF;
+terminal FOR;
+terminal TO;
+terminal DO;
+terminal PROGRAM;
+terminal PROCEDURE;
+terminal THEN;
+terminal VAR;
+terminal FOIS;
+terminal PLUS;
+terminal MOINS;
+terminal SUR;
+terminal POINTVIRG;
+terminal VIRG;
+terminal PARENTG;
+terminal PARENTD;
+terminal EGAL;
+terminal PPTQ;
+terminal PGDQ;
+terminal PPTOUEGQ;
+terminal PGDOUEGQ;
+terminal DIFF;
+terminal DEUXPOINT;
+terminal ASSIGN;
+terminal POINT;
+terminal ID;
+terminal INT;
+terminal REAL;
+terminal DQ;
+terminal CARAC;
+
+non terminal programme;
+non terminal bloc;
+non terminal blocdeclarations;
+non terminal declarations;
+non terminal unedeclaration;
+non terminal declarationvar;
+non terminal unedeclarationvar;
+non terminal variables;
+non terminal unevariable;
+non terminal declarationproc;
+non terminal enteteproc;
+non terminal parametres;
+non terminal unparametre;
+non terminal operations;
+non terminal uneoperation;
+non terminal affectation;
+non terminal boucle;
+non terminal condition;
+non terminal appel;
+non terminal expr;
+non terminal cible;
+non terminal listexpr;
+non terminal oprel;
+non terminal opadd;
+non terminal opmul;
+non terminal identifiant;
+non terminal flottant;
+non terminal entier;
+non terminal caractere;
+
+precedence right ASSIGN;
+precedence left EGAL, PPTQ, PGDQ, PPTOUEGQ, PGDOUEGQ, DIFF;
+precedence left PLUS, MOINS;
+precedence left FOIS, SUR;        
+
+programme ::= PROGRAM identifiant POINTVIRG bloc POINT ;
+bloc	::= blocdeclarations _BEGIN operations _END;
+blocdeclarations ::= /*rien*/
+		 | declarations;
+declarations ::= unedeclaration
+		| unedeclaration declarations;
+unedeclaration ::= VAR declarationvar
+		| declarationproc;
+declarationvar ::= unedeclarationvar
+	       | unedeclarationvar declarationvar;
+unedeclarationvar ::= variables DEUXPOINT identifiant POINTVIRG;
+variables ::= identifiant
+	 | identifiant VIRG variables;
+declarationproc ::= enteteproc POINTVIRG bloc POINTVIRG;
+enteteproc ::= PROCEDURE identifiant PARENTG parametres PARENTD;
+parametres ::= /*rien*/
+				| unparametre
+				| unparametre POINTVIRG parametres;
+unparametre ::= identifiant DEUXPOINT identifiant;
+operations ::= uneoperation
+			| uneoperation POINTVIRG operations;
+uneoperation ::= /*rien*/
+			| affectation
+			| boucle
+			| condition
+			| appel;
+affectation ::= cible ASSIGN expr;
+boucle ::= FOR affectation TO identifiant DO uneoperation;
+condition ::= IF expr THEN uneoperation;
+appel ::= identifiant PARENTG listexpr PARENTD
+      	  | identifiant;
+expr ::= entier
+		| flottant
+		| caractere
+		| cible
+		| unevariable PARENTG listexpr PARENTD
+		| expr oprel expr
+		| expr opadd expr
+		| expr opmul expr;
+cible ::= identifiant;
+listexpr ::= expr
+			| expr VIRG listexpr;
+oprel ::= PPTQ
+		| PGDQ
+		| EGAL
+		| PPTOUEGQ
+		| PGDOUEGQ
+		| DIFF;
+opadd ::= PLUS
+		| MOINS;
+opmul ::= FOIS
+		| SUR;
+identifiant ::= ID;
+flottant ::= REAL;
+entier ::= INT;
+caractere ::= CARAC;
