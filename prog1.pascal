@@ -20,5 +20,5 @@ begin
 	read(c);
 	writeln("combien de fois?");
 	read(i);
-	Ligne(c;i);
+	Ligne(c,i)
 end.
