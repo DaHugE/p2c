@@ -8,6 +8,8 @@ parser code {:
 
 action code {:
 
+	File f = new File("resultat.c");
+
 :}
 
 terminal _BEGIN;
@@ -84,8 +86,14 @@ precedence left EGAL, PPTQ, PGDQ, PPTOUEGQ, PGDOUEGQ, DIFF;
 precedence left PLUS, MOINS;
 precedence left FOIS, SUR;        
 
-programme ::= PROGRAM identifiant:i POINTVIRG bloc POINT {:System.out.println("-=PROGRAM "+i+" =-");:};
-bloc	::= blocdeclarations _BEGIN operations _END {:System.out.println("-=BLOC=-");:};
+ini::=programme{:out.close();:};
+programme ::= PROGRAM identifiant:i POINTVIRG bloc POINT 
+		{:	System.out.println("ini"); 
+            try{out =new PrintWriter(new FileWriter(f));}
+            catch(Exception e){System.out.println("fail");}
+			System.out.println("-=PROGRAM "+i+" =-");
+		:};
+bloc	::= blocdeclarations:b _BEGIN operations:o _END {:System.out.println("-=BLOC=-");out.println(o+n);:};
 blocdeclarations ::= /*rien*/
 		 | declarations;
 declarations ::= unedeclaration
@@ -119,7 +127,7 @@ uneoperation ::= /*rien*/
 			| appel;
 affectation ::= cible ASSIGN expr {:System.out.println("-=AFFECTATION=-");:};
 boucle ::= FOR affectation TO identifiant DO bloc {:System.out.println("-=BOUCLE FOR BLOC=-");:}
-       	   | FOR affectation TO identifiant DO uneoperation {:System.out.println("-=BOUCLE FOR=-");:};
+       	   | FOR affectation TO identifiant DO uneoperation {:System.out.println("-=BOUCLE FOR=-");out.println("for");:};
 condition ::= IF expr THEN uneoperation POINTVIRG{:System.out.println("-=IF THEN=-");:}
 	  | IF expr THEN uneoperation ELSE uneoperation {:System.out.println("-=IF THEN ELSE=-");:}
 	  | IF expr THEN bloc POINTVIRG {:System.out.println("-=IF THEN BLOC=-");:}
