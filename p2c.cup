@@ -8,9 +8,12 @@ parser code {:
 
 action code {:
 
+	File f = new File("resultat.c");
+
 :}
 
 terminal _BEGIN;
+terminal ELSE;
 terminal _END;
 terminal IF;
 terminal FOR;
@@ -18,6 +21,7 @@ terminal TO;
 terminal DO;
 terminal PROGRAM;
 terminal PROCEDURE;
+terminal FUNCTION;
 terminal THEN;
 terminal VAR;
 terminal FOIS;
@@ -40,7 +44,7 @@ terminal POINT;
 terminal ID;
 terminal INT;
 terminal REAL;
-terminal DQ;
+terminal CHAINE;
 terminal CARAC;
 
 non terminal programme;
@@ -54,8 +58,11 @@ non terminal variables;
 non terminal unevariable;
 non terminal declarationproc;
 non terminal enteteproc;
+non terminal entetefunc;
+non terminal declarationfunc;
 non terminal parametres;
 non terminal unparametre;
+non terminal param;
 non terminal operations;
 non terminal uneoperation;
 non terminal affectation;
@@ -72,31 +79,45 @@ non terminal identifiant;
 non terminal flottant;
 non terminal entier;
 non terminal caractere;
+non terminal chaine;
 
 precedence right ASSIGN;
 precedence left EGAL, PPTQ, PGDQ, PPTOUEGQ, PGDOUEGQ, DIFF;
 precedence left PLUS, MOINS;
 precedence left FOIS, SUR;        
 
-programme ::= PROGRAM identifiant POINTVIRG bloc POINT ;
-bloc	::= blocdeclarations _BEGIN operations _END;
+ini::=programme{:out.close();:};
+programme ::= PROGRAM identifiant:i POINTVIRG bloc POINT 
+		{:	System.out.println("ini"); 
+            try{out =new PrintWriter(new FileWriter(f));}
+            catch(Exception e){System.out.println("fail");}
+			System.out.println("-=PROGRAM "+i+" =-");
+		:};
+bloc	::= blocdeclarations:b _BEGIN operations:o _END {:System.out.println("-=BLOC=-");out.println(o+n);:};
 blocdeclarations ::= /*rien*/
 		 | declarations;
 declarations ::= unedeclaration
 		| unedeclaration declarations;
-unedeclaration ::= VAR declarationvar
-		| declarationproc;
+unedeclaration ::= VAR declarationvar {:System.out.println("-=DECLVAR=-");:}
+		| declarationproc
+		| declarationfunc;
 declarationvar ::= unedeclarationvar
 	       | unedeclarationvar declarationvar;
-unedeclarationvar ::= variables DEUXPOINT identifiant POINTVIRG;
+unedeclarationvar ::= variables DEUXPOINT identifiant POINTVIRG
+		  |variables DEUXPOINT identifiant;
 variables ::= identifiant
 	 | identifiant VIRG variables;
-declarationproc ::= enteteproc POINTVIRG bloc POINTVIRG;
+declarationproc ::= enteteproc POINTVIRG bloc POINTVIRG {:System.out.println("-=DECLPROC=-");:};
+declarationfunc ::= entetefunc DEUXPOINT identifiant POINTVIRG bloc POINTVIRG;
 enteteproc ::= PROCEDURE identifiant PARENTG parametres PARENTD;
+entetefunc ::= FUNCTION identifiant PARENTG parametres PARENTD
+	   |   FUNCTION identifiant ;
 parametres ::= /*rien*/
 				| unparametre
 				| unparametre POINTVIRG parametres;
-unparametre ::= identifiant DEUXPOINT identifiant;
+unparametre ::=  param DEUXPOINT identifiant;
+param ::= identifiant
+      | identifiant VIRG param;
 operations ::= uneoperation
 			| uneoperation POINTVIRG operations;
 uneoperation ::= /*rien*/
@@ -104,11 +125,15 @@ uneoperation ::= /*rien*/
 			| boucle
 			| condition
 			| appel;
-affectation ::= cible ASSIGN expr;
-boucle ::= FOR affectation TO identifiant DO uneoperation;
-condition ::= IF expr THEN uneoperation;
-appel ::= identifiant PARENTG listexpr PARENTD
-      	  | identifiant;
+affectation ::= cible ASSIGN expr {:System.out.println("-=AFFECTATION=-");:};
+boucle ::= FOR affectation TO identifiant DO bloc {:System.out.println("-=BOUCLE FOR BLOC=-");:}
+       	   | FOR affectation TO identifiant DO uneoperation {:System.out.println("-=BOUCLE FOR=-");out.println("for");:};
+condition ::= IF expr THEN uneoperation POINTVIRG{:System.out.println("-=IF THEN=-");:}
+	  | IF expr THEN uneoperation ELSE uneoperation {:System.out.println("-=IF THEN ELSE=-");:}
+	  | IF expr THEN bloc POINTVIRG {:System.out.println("-=IF THEN BLOC=-");:}
+	  | IF expr THEN bloc ELSE bloc POINTVIRG {:System.out.println("-=IF THEN ELSE BLOC=-");:};
+appel ::= identifiant PARENTG listexpr PARENTD {:System.out.println("-=APPEL PARENT=-");:}
+      	  | identifiant {:System.out.println("-=APPEL=-");:};
 expr ::= entier
 		| flottant
 		| caractere
@@ -116,7 +141,8 @@ expr ::= entier
 		| unevariable PARENTG listexpr PARENTD
 		| expr oprel expr
 		| expr opadd expr
-		| expr opmul expr;
+		| expr opmul expr
+		| chaine;
 cible ::= identifiant;
 listexpr ::= expr
 			| expr VIRG listexpr;
@@ -130,7 +156,8 @@ opadd ::= PLUS
 		| MOINS;
 opmul ::= FOIS
 		| SUR;
-identifiant ::= ID;
+identifiant ::= ID:i  {:RESULT = i;:};
 flottant ::= REAL;
 entier ::= INT;
 caractere ::= CARAC;
+chaine ::= CHAINE;
